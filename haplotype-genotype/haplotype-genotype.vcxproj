@@ -115,6 +115,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="models\genotype.cpp" />
+    <ClCompile Include="models\haplotype.cpp" />
+    <ClCompile Include="models\individual.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="models\genotype.h" />
+    <ClInclude Include="models\haplotype.h" />
+    <ClInclude Include="models\individual.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
