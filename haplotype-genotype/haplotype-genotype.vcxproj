@@ -119,11 +119,13 @@
     <ClCompile Include="models\genotype.cpp" />
     <ClCompile Include="models\haplotype.cpp" />
     <ClCompile Include="models\individual.cpp" />
+    <ClCompile Include="models\genetic_algorithm.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="models\genotype.h" />
     <ClInclude Include="models\haplotype.h" />
     <ClInclude Include="models\individual.h" />
+    <ClInclude Include="models\genetic_algorithm.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

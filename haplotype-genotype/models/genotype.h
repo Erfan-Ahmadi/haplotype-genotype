@@ -5,6 +5,8 @@
 
 #include <vector>
 
+#define SAFE_RELEASE(x) if(x != nullptr) { x->release(); x = nullptr; }
+
 class genotype
 {
 public:
