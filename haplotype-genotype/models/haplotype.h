@@ -6,32 +6,34 @@
 #include <vector>
 #include "genotype.h"
 
-class haplotype
+struct haplotype
 {
-public:
-	haplotype(_In_ const std::vector<int>& pData);
-
-	haplotype(
-		_In_ const int* pData,
-		_In_ const int& pSize);
-
-	~haplotype();
-
-	genotype* operator+(const haplotype& pSecond) const;
-
-	genotype* get_merge_genotyped(const haplotype& pSecond) const;
-
-#pragma region Setters
-#pragma endregion 
-
-#pragma region Getters
-	const std::vector<int>& get_data() const;
-#pragma endregion 
-
-	void release();
-
-private:
 	std::vector<int> _data;
 };
+
+inline bool operator==(const haplotype& pLhs, const haplotype& pRhs)
+{
+	return pLhs._data == pRhs._data;
+}
+
+inline genotype* operator+(const haplotype& pLhs, const haplotype& pRhs)
+{
+	if (pLhs._data.size() != pRhs._data.size())
+		return nullptr;
+
+	auto _genotype_data = std::vector<int>(pLhs._data.size());
+
+	for (auto i = 0; i < pLhs._data.size(); i++)
+	{
+		if (pLhs._data[i] == 1 && pRhs._data[i] == 1)
+			_genotype_data[i] = 1;
+		else if (pLhs._data[i] == 0 && pRhs._data[i] == 0)
+			_genotype_data[i] = 0;
+		else
+			_genotype_data[i] = 2;
+	}
+
+	return new genotype{ _genotype_data };
+}
 
 #endif

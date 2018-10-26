@@ -1,16 +1,20 @@
 #include "individual.h"
 #include <utility>
 
-individual::individual(
-	_In_ std::vector<haplotype*> pHaplotypes,
-	_In_ std::vector<genotype*> pGenotypes)
-	: _haplotypes(std::move(pHaplotypes)), _genotypes(std::move(pGenotypes))
+individual::individual(_In_ const std::vector<genotype*>& pGenotypes) : _genotypes(pGenotypes)
 {
 }
 
 individual::~individual()
 {
 	release();
+}
+
+void individual::set_data(
+	_In_ const std::vector<haplotype*>& pHaplotypes)
+{
+	this->_haplotypes = pHaplotypes;
+	calculate_fitness();
 }
 
 bool individual::is_valid_for_genotype()
@@ -34,29 +38,67 @@ bool individual::is_valid_for_genotype()
 	return true;
 }
 
-std::vector<mapping> individual::get_mappings() const
+float individual::calculate_fitness()
 {
-	auto _mappings = std::vector<mapping>();
+	return this->_fitness 
+	= (this->_haplotypes.size() + get_repeated_size()) / (this->_haplotypes.size() * 2);
+}
+
+int individual::get_repeated_size() const
+{
+	auto _count = 0;
+
+	auto _counted = std::vector<bool>(this->_haplotypes.size());
 
 	for (auto i = 0; i < this->_haplotypes.size(); i++)
 	{
+		if(_counted[i])
+			continue;
+
 		for (auto j = i + 1; j < this->_haplotypes.size(); j++)
 		{
-			for (auto k = 0; k < this->_genotypes.size(); k++)
+			if (*this->_haplotypes[i] == *this->_haplotypes[j])
 			{
-				if (*(this->_genotypes[k]) == *(*this->_haplotypes[i] + *this->_haplotypes[j]))
-				{
-					_mappings.push_back({i, j, k});
-				}
+				_counted[j] = true;
+				_count++;
 			}
 		}
 	}
 
-	return _mappings;
+	return _count;
+}
+
+std::vector<haplotype*> individual::get_hapolotypes_without_repetition() const
+{
+	auto _ret = std::vector<haplotype*>();
+
+	for (const auto& _haplotype : this->_haplotypes)
+	{
+		auto _has_haplotype = false;
+		for (const auto& _r : _ret)
+		{
+			//TODO: pointer equal
+			if (*_r == *_haplotype)
+			{
+				_has_haplotype = true;
+				break;
+			}
+		}
+
+		if (!_has_haplotype)
+			_ret.push_back(_haplotype);
+	}
+
+	return _ret;
+}
+
+float individual::get_fitness() const
+{
+	return this->_fitness;
 }
 
 void individual::release()
 {
-	for (auto& _haplotype : this->_haplotypes)
-		SAFE_RELEASE(_haplotype);
+	//for (auto& _haplotype : this->_haplotypes)
+	//	SAFE_RELEASE(_haplotype);
 }
