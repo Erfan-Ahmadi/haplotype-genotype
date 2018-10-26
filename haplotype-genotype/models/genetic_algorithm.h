@@ -29,7 +29,8 @@ private:
 	static individual* crossover(
 		_In_ const individual* pFirst,
 		_In_ const individual* pSecond,
-		_In_ const float& pCrossoverRate);
+		_In_ const float& pCrossoverRate,
+		_In_ const std::vector<genotype*>& pGenotypes);
 
 	static individual* get_population_fittest(_In_ const std::vector<individual*>& pPopulation);
 

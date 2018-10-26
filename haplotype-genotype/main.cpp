@@ -10,24 +10,24 @@ genotype* line_to_genotype(const char* pLine, const int& pSize);
 
 int main()
 {
-	auto _genotypes = std::vector<genotype*>(20);
+	auto _genotypes = std::vector<genotype*>();
 
 	std::string _line;
 	std::ifstream _sample_data_file("sample_datas/genotype2.txt");
 
 	auto _genotype_size = 20;
 
-	//if (_sample_data_file.is_open())
-	//{
-	//	while (getline(_sample_data_file, _line))
-	//	{
-	//		_genotype_size = _line.size();
-	//		_genotypes.push_back(line_to_genotype(_line.c_str(), _line.size()));
-	//	}
+	if (_sample_data_file.is_open())
+	{
+		while (getline(_sample_data_file, _line))
+		{
+			_genotype_size = _line.size();
+			_genotypes.push_back(line_to_genotype(_line.c_str(), _line.size()));
+		}
 
-	//	_sample_data_file.close();
-	//}
-	//else std::cout << "Unable to open file";
+		_sample_data_file.close();
+	}
+	else std::cout << "Unable to open file";
 
 	const auto _population_size = 50;
 	const auto _genotypes_size = _genotypes.size();

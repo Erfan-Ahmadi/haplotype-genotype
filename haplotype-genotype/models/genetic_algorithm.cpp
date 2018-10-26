@@ -48,7 +48,7 @@ void genetic_algorithm::run(
 	auto _terminate = false;
 
 	auto _iterations = 0;
-	const auto _max_iterations = 100;
+	const auto _max_iterations = 1000;
 
 	while (!_terminate)
 	{
@@ -57,7 +57,7 @@ void genetic_algorithm::run(
 		auto _next_population = std::vector<individual*>();
 
 		if (pElitism) {
-			_next_population.push_back(new individual(*get_population_fittest(_population)));
+			_next_population.insert(_next_population.begin(), new individual(*get_population_fittest(_population)));
 			_elitism_offset = 1;
 		}
 		else {
@@ -66,11 +66,11 @@ void genetic_algorithm::run(
 
 		// Crossover
 
-		for(auto i = _elitism_offset; i < _population.size(); i++)
+		for (auto i = _elitism_offset; i < _population.size(); i++)
 		{
 			const auto _first = tournament_selection(_population);
 			const auto _second = tournament_selection(_population);
-			auto _new_individual = crossover(_first, _second, pCrossoverRate);
+			auto _new_individual = crossover(_first, _second, pCrossoverRate, pGenotypes);
 			_next_population.push_back(_new_individual);
 		}
 
@@ -79,7 +79,33 @@ void genetic_algorithm::run(
 
 		// Mutation 
 
-		s_global_fittest = get_population_fittest(_population);
+		for (auto i = 0; i < _population.size(); i++)
+		{
+			const auto _individual = _population[i];
+
+			const auto _prob = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+
+			if(_prob > pMutationRate)
+				continue;
+
+			auto _rand_position = rand() % _individual->get_data()->size();
+
+			if (_rand_position % 2 != 0)
+				_rand_position--;
+
+			std::cout << "Rand Position: " << _rand_position << std::endl;
+
+			const auto _gen = get_generating_haplotypes(pGenotypes[_rand_position / 2]);
+
+			_individual->set_data_at(_rand_position, _gen[0]);
+			_individual->set_data_at(_rand_position + 1, _gen[1]);
+		}
+
+		// Get fittest
+		const auto _population_fittest = get_population_fittest(_population);
+
+		if (s_global_fittest->get_fitness() < _population_fittest->get_fitness())
+			s_global_fittest = get_population_fittest(_population);
 
 		std::cout << s_global_fittest->get_fitness() << std::endl;
 
@@ -89,6 +115,7 @@ void genetic_algorithm::run(
 			break;
 		}
 	}
+
 	release_population(_population);
 }
 
@@ -109,9 +136,28 @@ individual* genetic_algorithm::tournament_selection(_In_ const std::vector<indiv
 individual* genetic_algorithm::crossover(
 	_In_ const individual* pFirst,
 	_In_ const individual* pSecond,
-	_In_ const float& pCrossoverRate)
+	_In_ const float& pCrossoverRate,
+	_In_ const std::vector<genotype*>& pGenotypes)
 {
-	return new individual(*pFirst);
+	auto _new_individual = new individual(pGenotypes);
+	auto _new_data = std::vector<haplotype*>();
+
+	for (auto i = 0; i < pFirst->get_data()->size(); i += 2)
+	{
+		if (rand() % 2 == 0)
+		{
+			_new_data.push_back(new haplotype(*pFirst->get_data_at(i)));
+			_new_data.push_back(new haplotype(*pFirst->get_data_at(i + 1)));
+		}
+		else
+		{
+			_new_data.push_back(new haplotype(*pSecond->get_data_at(i)));
+			_new_data.push_back(new haplotype(*pSecond->get_data_at(i + 1)));
+		}
+	}
+
+	_new_individual->set_data(_new_data);
+	return _new_individual;
 }
 
 individual* genetic_algorithm::get_population_fittest(_In_ const std::vector<individual*>& pPopulation)

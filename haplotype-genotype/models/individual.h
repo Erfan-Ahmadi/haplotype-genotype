@@ -24,6 +24,11 @@ public:
 #pragma region Setters
 	void set_data(
 		_In_ const std::vector<haplotype*>& pHaplotypes);
+
+	void set_data_at(const int& i, haplotype* pHaplotype)
+	{
+		 _haplotypes[i] = pHaplotype;
+	}
 #pragma endregion 
 
 #pragma region Getters
@@ -32,6 +37,11 @@ public:
 	const std::vector<haplotype*>* get_data() const
 	{
 		return &_haplotypes;
+	}
+
+	haplotype* get_data_at(const int& i) const
+	{
+		return _haplotypes[i];
 	}
 #pragma endregion 
 

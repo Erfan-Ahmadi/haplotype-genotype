@@ -40,8 +40,8 @@ bool individual::is_valid_for_genotype()
 
 float individual::calculate_fitness()
 {
-	return this->_fitness 
-	= (this->_haplotypes.size() + get_repeated_size()) / (this->_haplotypes.size() * 2);
+	return this->_fitness = get_repeated_size();
+	//return this->_fitness = float(this->_haplotypes.size() + get_repeated_size()) / (this->_haplotypes.size() * 2);
 }
 
 int individual::get_repeated_size() const
