@@ -6,6 +6,12 @@
 #include "genotype.h"
 #include "haplotype.h"
 
+struct resolution
+{
+	haplotype* _h1;
+	haplotype* _h2;
+};
+
 class individual
 {
 public:

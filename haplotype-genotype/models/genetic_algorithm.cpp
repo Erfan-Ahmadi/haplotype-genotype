@@ -6,6 +6,41 @@
 
 individual* genetic_algorithm::s_global_fittest = nullptr;
 
+struct resolution_space
+{
+	std::vector<resolution> _res_space;
+};
+
+resolution_space get_resolution_space(const std::vector<int>& pGenotypeData, const int& pStart = 0)
+{
+	std::vector<resolution> _space;
+	std::vector<int> _h1_data;
+	std::vector<int> _h2_data;
+
+	for (auto i = pStart; i < pGenotypeData.size(); i++)
+	{
+		if (pGenotypeData[i] == 2)
+		{
+			_h1_data.push_back(0);
+			_h2_data.push_back(1);
+		}
+		else if (pGenotypeData[i] == 0)
+		{
+			_h1_data.push_back(0);
+			_h2_data.push_back(0);
+		}
+		else
+		{
+			_h1_data.push_back(1);
+			_h2_data.push_back(1);
+		}
+	}
+
+	resolution _res = { new haplotype{_h1_data}, new haplotype{_h2_data} };
+	_space.push_back(_res);
+	return resolution_space{ _space };
+}
+
 void genetic_algorithm::initialize_population(
 	_In_ const std::vector<genotype*>& pGenotypes,
 	_In_ const int& pPopulationSize,
@@ -85,7 +120,7 @@ void genetic_algorithm::run(
 
 			const auto _prob = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
 
-			if(_prob > pMutationRate)
+			if (_prob > pMutationRate)
 				continue;
 
 			auto _rand_position = rand() % _individual->get_data()->size();
