@@ -23,31 +23,9 @@ void individual::set_data_at(const int& i, haplotype* pHaplotype)
 	_haplotypes[i] = pHaplotype;
 }
 
-//bool individual::is_valid_for_genotype()
-//{
-//	auto _has_genotypes = std::vector<bool>(this->_gen_size);
-//
-//	for (auto i = 0; i < this->_haplotypes.size(); i += 2)
-//	{
-//		const auto _left = this->_haplotypes[i];
-//
-//		const auto _right = this->_haplotypes[i + 1];
-//
-//		const auto _generated_genotype = *_left + *_right;
-//
-//		if (!(*(this->_genotypes[i / 2]) == *_generated_genotype))
-//		{
-//			return false;
-//		}
-//	}
-//
-//	return true;
-//}
-
 float individual::calculate_fitness()
 {
 	return this->_fitness = get_repeated_size();
-	//return this->_fitness = float(this->_haplotypes.size() + get_repeated_size()) / (this->_haplotypes.size() * 2);
 }
 
 int individual::get_repeated_size() const

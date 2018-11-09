@@ -6,66 +6,199 @@
 #include <fstream>
 #include <string>
 
-genotype* line_to_genotype(const char* pLine, const int& pSize);
+genotype* line_to_genotype(
+	_In_ const char* pLine,
+	_In_ const int& pSize);
+
+bool is_valid_for_genotype(
+	_In_ std::vector<genotype*>& pGenotypes,
+	_In_  const std::vector<haplotype*>& pHaplotypes);
+
+template <class T>
+void print_array(_In_ std::vector<T>& pData)
+{
+	for (T _data : pData)
+	{
+		std::cout << static_cast<int>(_data);
+	}
+	std::cout << std::endl;
+}
+
+template <class T>
+void get_input(_Out_ T& pOut, _In_ const T& pDeafult, _In_z_ const std::string& name)
+{
+	std::cout << "Enter " << name << " (default = " << pDeafult << ") :";
+	try
+	{
+		std::cin >> pOut;
+	}
+	catch (int _exception)
+	{
+		pOut = pDeafult;
+	}
+}
 
 int main()
 {
 	auto _genotypes = std::vector<genotype*>();
 
-	std::string _line;
-	std::ifstream _sample_data_file("sample_datas/genotype2.txt");
+	const auto _get_input = false;
 
-	auto _genotype_size = 20;
+	std::string _file_name;
 
-	if (_sample_data_file.is_open())
+	if (_get_input)
 	{
-		while (getline(_sample_data_file, _line))
+		std::cout << "Enter File Dir : ";
+		std::cin >> _file_name;
+	}
+	else
+	{
+		_file_name = "genotype2.txt";
+	}
+
+	int _genotype_size;
+	std::string _line;
+	std::ifstream _sample_data_file(_file_name);
+
+	{
+		if (_sample_data_file.is_open())
 		{
-			_genotype_size = _line.size();
-			_genotypes.push_back(line_to_genotype(_line.c_str(), _line.size()));
+			while (getline(_sample_data_file, _line))
+			{
+				try
+				{
+					_genotype_size = _line.size();
+					_genotypes.push_back(line_to_genotype(_line.c_str(), _line.size()));
+				}
+				catch (int _exception)
+				{
+					std::cout << "Unable to parse genotypes" << std::endl;
+					system("pause");
+					return 0;
+				}
+			}
+
+			_sample_data_file.close();
+		}
+		else
+		{
+			std::cout << "Unable to open file" << std::endl;
+			system("pause");
+			return 0;
 		}
 
-		_sample_data_file.close();
+		if (_genotypes.empty())
+		{
+			std::cout << "Unable to parse genotypes" << std::endl;
+			system("pause");
+			return 0;
+		}
 	}
-	else std::cout << "Unable to open file";
 
-	const auto _population_size = 50;
 	const auto _genotypes_size = _genotypes.size();
 
-	for(auto i = 0; i < _genotypes_size; i++)
+	float _crossover_rate;
+	float _mutation_rate;
+	int _population_size;
+	int _iterations;
+
+	const auto _default_crossover_rate = 0.8f;
+	const auto _default_mutation_rate = 0.01f;
+	const auto _default_population_size = 10000;
+	const auto _default_iterations = 100;
+
+	if (_get_input)
 	{
-		auto _random_data = std::vector<int>(_genotype_size);
-
-		for(auto j = 0; j < _genotype_size; j++)
-		{
-			_random_data[j] = rand() % 3;
-		}
-
-		_genotypes[i] = new genotype{ _random_data };
+		get_input(_crossover_rate,	_default_crossover_rate,	"Crossover Rate");
+		get_input(_mutation_rate,	_default_mutation_rate,		"Mutation Rate");
+		get_input(_population_size, _default_population_size,	"Population Size");
+		get_input(_iterations,		_default_iterations,		"Iterations Count");
+	}
+	else
+	{
+		_crossover_rate = _default_crossover_rate;
+		_mutation_rate = _default_mutation_rate;
+		_population_size = _default_population_size;
+		_iterations = _default_iterations;
 	}
 
 	const auto _start_time = std::chrono::system_clock::now();
 
 	//RUN ALGORITHM HERE
-	genetic_algorithm::run(_genotypes, _population_size);
+
+	std::cout << "Crossover Rate		= " << _crossover_rate << std::endl;
+	std::cout << "Mutation Rate		= " << _mutation_rate << std::endl;
+	std::cout << "Iteration Count		= " << _iterations << std::endl;
+	std::cout << "Population Size		= " << _population_size << std::endl;
+
+	std::cout << std::endl;
+
+	std::cout << "Running..." << std::endl;
+
+	genetic_algorithm::run(_genotypes, _population_size, _iterations, _crossover_rate, _mutation_rate);
 
 	const auto _end_time = std::chrono::system_clock::now();
 
-	std::cout << "- Random Data Size: " << _genotypes_size << std::endl;
-	std::cout << "- Each Genotype Size: " << _genotype_size << std::endl;
-	std::cout << "- Population Size: " << _population_size << std::endl;
-	std::cout << "- Geneteic Algorithm Duration: " <<
-		std::chrono::duration_cast<std::chrono::milliseconds>(_end_time - _start_time).count() << " mili seconds." << std::endl;
-	std::cout << "- Best Fitness: " << "" << std::endl;
+
+	{
+
+		std::cout << "-Data Size: " << _genotypes_size << std::endl;
+
+		std::cout << "-Each Genotype Size: " << _genotype_size << std::endl;
+
+		std::cout << "-Population Size: " << _population_size << std::endl;
+
+		std::cout << "-Geneteic Algorithm Duration: " <<
+			std::chrono::duration_cast<std::chrono::milliseconds>(_end_time - _start_time).count() << " mili seconds." << std::endl;
+
+		const auto _output = genetic_algorithm::s_global_fittest->get_hapolotypes_without_repetition();
+
+		std::cout << "- Output Haplotypes Size: " << _output.size() << std::endl;
+
+		const std::string is_valid_str = (is_valid_for_genotype(_genotypes, _output))
+			? "Is Valid" : "Not Valid (Algorithm Not Correct)";
+
+		std::cout << "- Validity Check : " << is_valid_str << std::endl;
+	}
 
 	system("pause");
 
 	return 0;
 }
 
-genotype* line_to_genotype(const char* pLine, const int& pSize)
+bool is_valid_for_genotype(
+	_In_ std::vector<genotype*>& pGenotypes,
+	_In_  const std::vector<haplotype*>& pHaplotypes)
 {
-	auto _genotype_data = std::vector<int>(pSize);
+	auto _does_generate = std::vector<bool>(pGenotypes.size());
+
+	for (int i = 0; i < pHaplotypes.size(); i++)
+	{
+		const auto _left = pHaplotypes[i];
+		for (int j = i; j < pHaplotypes.size(); j++)
+		{
+			const auto _right = pHaplotypes[j];
+
+			for (int k = 0; k < pGenotypes.size(); k++)
+			{
+				if (!_does_generate[k] && (*_left + *_right)->_data == pGenotypes[k]->_data)
+					_does_generate[k] = true;
+			}
+		}
+	}
+
+	for (const auto& _does : _does_generate)
+		if (!_does)
+			return false;
+
+	return true;
+}
+
+genotype* line_to_genotype(
+	_In_ const char* pLine,
+	_In_ const int& pSize)
+{
+	auto _genotype_data = std::vector<char>(pSize);
 
 	for (auto i = 0; i < pSize; i++)
 	{

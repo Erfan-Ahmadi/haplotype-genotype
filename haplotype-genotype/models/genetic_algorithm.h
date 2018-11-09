@@ -11,9 +11,12 @@ public:
 	static void run(
 		_In_ const std::vector<genotype*>& pGenotypes,
 		_In_ const int& pPopulationSize,
+		_In_	const int& pIterationCount,
 		_In_ const float& pCrossoverRate = 0.8f,
 		_In_ const float& pMutationRate = 0.01f,
 		_In_ const bool& pElitism = true);
+
+	static individual* s_global_fittest;
 
 	~genetic_algorithm() = default;
 
@@ -40,8 +43,6 @@ private:
 	static individual* get_population_fittest(_In_ const std::vector<individual*>& pPopulation);
 
 	static std::vector<haplotype*> get_generating_haplotypes(_In_ genotype* pGenotype);
-
-	static individual* s_global_fittest;
 
 	static void release_population(_In_ std::vector<individual*>& pPopulation);
 };

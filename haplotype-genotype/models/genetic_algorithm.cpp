@@ -6,41 +6,6 @@
 
 individual* genetic_algorithm::s_global_fittest = nullptr;
 
-struct resolution_space
-{
-	std::vector<resolution> _res_space;
-};
-
-resolution_space get_resolution_space(const std::vector<int>& pGenotypeData, const int& pStart = 0)
-{
-	std::vector<resolution> _space;
-	std::vector<bool> _h1_data;
-	std::vector<bool> _h2_data;
-
-	for (auto i = pStart; i < pGenotypeData.size(); i++)
-	{
-		if (pGenotypeData[i] == 2)
-		{
-			_h1_data.push_back(0);
-			_h2_data.push_back(1);
-		}
-		else if (pGenotypeData[i] == 0)
-		{
-			_h1_data.push_back(0);
-			_h2_data.push_back(0);
-		}
-		else
-		{
-			_h1_data.push_back(1);
-			_h2_data.push_back(1);
-		}
-	}
-
-	resolution _res = { new haplotype{_h1_data}, new haplotype{_h2_data} };
-	_space.push_back(_res);
-	return resolution_space{ _space };
-}
-
 void genetic_algorithm::initialize_population(
 	_In_ const std::vector<genotype*>& pGenotypes,
 	_In_ const int& pPopulationSize,
@@ -64,7 +29,7 @@ void genetic_algorithm::initialize_population(
 
 void genetic_algorithm::mutation(
 	_In_ const std::vector<genotype*>& pGenotypes,
-	_In_ const float& pMutationRate, 
+	_In_ const float& pMutationRate,
 	_In_ const std::vector<individual*>& pPopulation)
 {
 	for (auto i = 0; i < pPopulation.size(); i++)
@@ -90,11 +55,12 @@ void genetic_algorithm::mutation(
 }
 
 void genetic_algorithm::run(
-	_In_ const std::vector<genotype*>& pGenotypes,
-	_In_ const int& pPopulationSize,
-	_In_ const float& pCrossoverRate,
-	_In_ const float& pMutationRate,
-	_In_ const bool& pElitism)
+	_In_	const std::vector<genotype*>& pGenotypes,
+	_In_	const int& pPopulationSize,
+	_In_	const int& pIterationCount,
+	_In_	const float& pCrossoverRate,
+	_In_	const float& pMutationRate,
+	_In_	const bool& pElitism)
 {
 	srand(time(nullptr));
 
@@ -109,9 +75,8 @@ void genetic_algorithm::run(
 	s_global_fittest = _population[0];
 
 	auto _terminate = false;
-	
+
 	auto _iterations = 0;
-	const auto _max_iterations = 100;
 
 	while (!_terminate)
 	{
@@ -160,18 +125,18 @@ void genetic_algorithm::run(
 		const auto _population_fittest = get_population_fittest(_population);
 
 		if (s_global_fittest->get_fitness() < _population_fittest->get_fitness())
-			s_global_fittest = get_population_fittest(_population);
+			s_global_fittest = get_population_fittest(_population)->copy();
 
-		std::cout << s_global_fittest->get_fitness() << std::endl;
+		std::cout << s_global_fittest->get_data()->size() - s_global_fittest->get_fitness() << std::endl;
 
-		if (_iterations++ > _max_iterations)
+		if (_iterations++ >= pIterationCount)
 		{
 			_terminate = true;
 			break;
 		}
 	}
 
-	release_population(_population);
+	//release_population(_population);
 }
 
 individual* genetic_algorithm::tournament_selection(_In_ const std::vector<individual*>& pPopulation)

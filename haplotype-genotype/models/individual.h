@@ -6,12 +6,6 @@
 #include "genotype.h"
 #include "haplotype.h"
 
-struct resolution
-{
-	haplotype* _h1;
-	haplotype* _h2;
-};
-
 class individual
 {
 public:
@@ -27,6 +21,19 @@ public:
 
 	std::vector<haplotype*> get_hapolotypes_without_repetition() const;
 
+	individual* copy() const
+	{
+		auto _elite = new individual();
+		auto _hap_data = std::vector<haplotype*>(this->_haplotypes.size());
+
+		for (auto i = 0; i < _hap_data.size(); i++)
+			_hap_data[i] = new haplotype(*this->get_data_at(i));
+
+		_elite->set_data(_hap_data);
+
+		return _elite;
+	}
+
 #pragma region Setters
 	void set_data(
 		_In_ const std::vector<haplotype*>& pHaplotypes);
@@ -35,8 +42,10 @@ public:
 #pragma endregion 
 
 #pragma region Getters
+
 	float get_fitness() const;
-	void release_haplotype(std::vector<haplotype*>::value_type& _haplotype);
+
+	void release_haplotype(std::vector<haplotype*>::value_type& pHaplotype);
 
 	const std::vector<haplotype*>* get_data() const
 	{
