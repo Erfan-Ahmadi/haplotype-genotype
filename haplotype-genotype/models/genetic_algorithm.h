@@ -1,3 +1,8 @@
+/*
+Source			 : Please direct any bugs to https://github.com/Erfan-Ahmadi/haplotype-genotype issues
+Developers		 : Erfan Ahmadi
+*/
+
 #pragma once
 
 #ifndef __POPULATION__ 
