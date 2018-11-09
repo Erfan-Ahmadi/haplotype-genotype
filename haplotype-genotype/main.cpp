@@ -47,7 +47,7 @@ int main()
 {
 	auto _genotypes = std::vector<genotype*>();
 
-	const auto _get_input = false;
+	const auto _get_input = true;
 
 	std::string _file_name;
 
@@ -106,11 +106,13 @@ int main()
 	float _mutation_rate;
 	int _population_size;
 	int _iterations;
+	int _max_rep;
 
 	const auto _default_crossover_rate = 0.8f;
-	const auto _default_mutation_rate = 0.01f;
-	const auto _default_population_size = 10000;
-	const auto _default_iterations = 100;
+	const auto _default_mutation_rate = 0.1f;
+	const auto _default_population_size = 5000;
+	const auto _default_iterations = 1000;
+	const auto _default_max_rep = 25;
 
 	if (_get_input)
 	{
@@ -118,6 +120,7 @@ int main()
 		get_input(_mutation_rate,	_default_mutation_rate,		"Mutation Rate");
 		get_input(_population_size, _default_population_size,	"Population Size");
 		get_input(_iterations,		_default_iterations,		"Iterations Count");
+		get_input(_max_rep,			 _default_max_rep,			"Max Rep Count");
 	}
 	else
 	{
@@ -125,6 +128,7 @@ int main()
 		_mutation_rate = _default_mutation_rate;
 		_population_size = _default_population_size;
 		_iterations = _default_iterations;
+		_max_rep = _default_max_rep;
 	}
 
 	const auto _start_time = std::chrono::system_clock::now();
@@ -138,9 +142,7 @@ int main()
 
 	std::cout << std::endl;
 
-	std::cout << "Running..." << std::endl;
-
-	genetic_algorithm::run(_genotypes, _population_size, _iterations, _crossover_rate, _mutation_rate);
+	genetic_algorithm::run(_genotypes, _population_size, _iterations, _max_rep, _crossover_rate, _mutation_rate);
 
 	const auto _end_time = std::chrono::system_clock::now();
 
