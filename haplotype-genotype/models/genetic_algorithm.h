@@ -24,6 +24,11 @@ private:
 		_In_ const int& pPopulationSize,
 		_In_ std::vector<individual*>& pPopulation);
 
+	static void mutation(
+		_In_ const std::vector<genotype*>& pGenotypes,
+		_In_ const float& pMutationRate,
+		_In_ const std::vector<individual*>& _population);
+
 	static individual* tournament_selection(_In_ const std::vector<individual*>& pPopulation);
 
 	static individual* crossover(

@@ -9,7 +9,7 @@
 
 struct genotype
 {
-	std::vector<int> _data;
+	std::vector<char> _data;
 };
 
 inline bool operator==(const genotype& pLhs, const genotype& pRhs) { return pLhs._data == pRhs._data; };

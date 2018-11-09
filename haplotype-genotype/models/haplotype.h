@@ -8,7 +8,7 @@
 
 struct haplotype
 {
-	std::vector<int> _data;
+	std::vector<bool> _data;
 };
 
 inline bool operator==(const haplotype& pLhs, const haplotype& pRhs)
@@ -21,7 +21,7 @@ inline genotype* operator+(const haplotype& pLhs, const haplotype& pRhs)
 	if (pLhs._data.size() != pRhs._data.size())
 		return nullptr;
 
-	auto _genotype_data = std::vector<int>(pLhs._data.size());
+	auto _genotype_data = std::vector<char>(pLhs._data.size());
 
 	for (auto i = 0; i < pLhs._data.size(); i++)
 	{

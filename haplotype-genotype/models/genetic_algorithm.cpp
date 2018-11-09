@@ -14,8 +14,8 @@ struct resolution_space
 resolution_space get_resolution_space(const std::vector<int>& pGenotypeData, const int& pStart = 0)
 {
 	std::vector<resolution> _space;
-	std::vector<int> _h1_data;
-	std::vector<int> _h2_data;
+	std::vector<bool> _h1_data;
+	std::vector<bool> _h2_data;
 
 	for (auto i = pStart; i < pGenotypeData.size(); i++)
 	{
@@ -56,9 +56,36 @@ void genetic_algorithm::initialize_population(
 			_haplotypes.insert(_haplotypes.end(), _generating_haplotypes.begin(), _generating_haplotypes.end());
 		}
 
-		auto _individual = new individual(pGenotypes);
+		auto _individual = new individual();
 		_individual->set_data(_haplotypes);
 		pPopulation.push_back(_individual);
+	}
+}
+
+void genetic_algorithm::mutation(
+	_In_ const std::vector<genotype*>& pGenotypes,
+	_In_ const float& pMutationRate, 
+	_In_ const std::vector<individual*>& pPopulation)
+{
+	for (auto i = 0; i < pPopulation.size(); i++)
+	{
+		const auto _individual = pPopulation[i];
+
+		const auto _prob = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+
+		if (_prob > pMutationRate)
+			continue;
+
+		auto _rand_position = rand() % _individual->get_data()->size();
+
+		if (_rand_position % 2 != 0)
+			_rand_position--;
+
+		const auto _gen = get_generating_haplotypes(pGenotypes[_rand_position / 2]);
+
+		_individual->set_data_at(_rand_position, _gen[0]);
+		_individual->set_data_at(_rand_position + 1, _gen[1]);
+		_individual->calculate_fitness();
 	}
 }
 
@@ -78,12 +105,13 @@ void genetic_algorithm::run(
 	auto _elitism_offset = 0;
 
 	initialize_population(pGenotypes, pPopulationSize, _population);
+
 	s_global_fittest = _population[0];
 
 	auto _terminate = false;
-
+	
 	auto _iterations = 0;
-	const auto _max_iterations = 1000;
+	const auto _max_iterations = 100;
 
 	while (!_terminate)
 	{
@@ -92,7 +120,15 @@ void genetic_algorithm::run(
 		auto _next_population = std::vector<individual*>();
 
 		if (pElitism) {
-			_next_population.insert(_next_population.begin(), new individual(*get_population_fittest(_population)));
+			auto _elite = new individual();
+			auto _hap_data = std::vector<haplotype*>(_population[0]->get_data()->size());
+
+			for (int i = 0; i < _hap_data.size(); i++)
+				_hap_data[i] = new haplotype(*_population[0]->get_data_at(i));
+
+			_elite->set_data(_hap_data);
+
+			_next_population.insert(_next_population.begin(), _elite);
 			_elitism_offset = 1;
 		}
 		else {
@@ -112,29 +148,13 @@ void genetic_algorithm::run(
 		release_population(_population);
 		_population = _next_population;
 
+
 		// Mutation 
+		mutation(pGenotypes, pMutationRate, _population);
 
-		for (auto i = 0; i < _population.size(); i++)
-		{
-			const auto _individual = _population[i];
 
-			const auto _prob = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+		// Local Optimization
 
-			if (_prob > pMutationRate)
-				continue;
-
-			auto _rand_position = rand() % _individual->get_data()->size();
-
-			if (_rand_position % 2 != 0)
-				_rand_position--;
-
-			std::cout << "Rand Position: " << _rand_position << std::endl;
-
-			const auto _gen = get_generating_haplotypes(pGenotypes[_rand_position / 2]);
-
-			_individual->set_data_at(_rand_position, _gen[0]);
-			_individual->set_data_at(_rand_position + 1, _gen[1]);
-		}
 
 		// Get fittest
 		const auto _population_fittest = get_population_fittest(_population);
@@ -174,7 +194,7 @@ individual* genetic_algorithm::crossover(
 	_In_ const float& pCrossoverRate,
 	_In_ const std::vector<genotype*>& pGenotypes)
 {
-	auto _new_individual = new individual(pGenotypes);
+	auto _new_individual = new individual();
 	auto _new_data = std::vector<haplotype*>();
 
 	for (auto i = 0; i < pFirst->get_data()->size(); i += 2)
@@ -215,12 +235,13 @@ void genetic_algorithm::release_population(_In_ std::vector<individual*>& pPopul
 	for (auto& _individual : pPopulation)
 		SAFE_RELEASE(_individual);
 	pPopulation.clear();
+	pPopulation.shrink_to_fit();
 }
 
 std::vector<haplotype*> genetic_algorithm::get_generating_haplotypes(genotype* pGenotype)
 {
-	auto _data1 = std::vector<int>(pGenotype->_data.size());
-	auto _data2 = std::vector<int>(pGenotype->_data.size());
+	auto _data1 = std::vector<bool>(pGenotype->_data.size());
+	auto _data2 = std::vector<bool>(pGenotype->_data.size());
 
 	for (auto i = 0; i < pGenotype->_data.size(); i++)
 	{

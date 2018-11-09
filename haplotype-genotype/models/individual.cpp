@@ -1,7 +1,7 @@
 #include "individual.h"
 #include <utility>
 
-individual::individual(_In_ const std::vector<genotype*>& pGenotypes) : _genotypes(pGenotypes)
+individual::individual(): _fitness(0)
 {
 }
 
@@ -17,26 +17,32 @@ void individual::set_data(
 	calculate_fitness();
 }
 
-bool individual::is_valid_for_genotype()
+void individual::set_data_at(const int& i, haplotype* pHaplotype)
 {
-	auto _has_genotypes = std::vector<bool>(this->_genotypes.size());
-
-	for (auto i = 0; i < this->_haplotypes.size(); i += 2)
-	{
-		const auto _left = this->_haplotypes[i];
-
-		const auto _right = this->_haplotypes[i + 1];
-
-		const auto _generated_genotype = *_left + *_right;
-
-		if (!(*(this->_genotypes[i / 2]) == *_generated_genotype))
-		{
-			return false;
-		}
-	}
-
-	return true;
+	release_haplotype(_haplotypes[i]);
+	_haplotypes[i] = pHaplotype;
 }
+
+//bool individual::is_valid_for_genotype()
+//{
+//	auto _has_genotypes = std::vector<bool>(this->_gen_size);
+//
+//	for (auto i = 0; i < this->_haplotypes.size(); i += 2)
+//	{
+//		const auto _left = this->_haplotypes[i];
+//
+//		const auto _right = this->_haplotypes[i + 1];
+//
+//		const auto _generated_genotype = *_left + *_right;
+//
+//		if (!(*(this->_genotypes[i / 2]) == *_generated_genotype))
+//		{
+//			return false;
+//		}
+//	}
+//
+//	return true;
+//}
 
 float individual::calculate_fitness()
 {
@@ -97,8 +103,21 @@ float individual::get_fitness() const
 	return this->_fitness;
 }
 
+void individual::release_haplotype(haplotype*& pHaplotype)
+{
+	pHaplotype->_data.clear();
+	pHaplotype->_data.shrink_to_fit();
+	delete pHaplotype;
+	pHaplotype = nullptr;
+}
+
 void individual::release()
 {
-	//for (auto& _haplotype : this->_haplotypes)
-	//	SAFE_RELEASE(_haplotype);
+	for (auto& _haplotype : this->_haplotypes)
+	{
+		release_haplotype(_haplotype);
+	}
+
+	this->_haplotypes.clear();
+	this->_haplotypes.shrink_to_fit();
 }
