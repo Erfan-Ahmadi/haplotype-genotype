@@ -20,13 +20,16 @@ bool is_valid_for_genotype(
 	_In_  const std::vector<haplotype*>& pHaplotypes);
 
 template <class T>
-void print_array(_In_ std::vector<T>& pData)
+std::string array_to_str(_In_ std::vector<T>& pData)
 {
+	std::string _result;
+
 	for (T _data : pData)
 	{
-		std::cout << static_cast<int>(_data);
+		_result += std::to_string(_data);
 	}
-	std::cout << std::endl;
+	
+	return _result;
 }
 
 template <class T>
@@ -47,7 +50,7 @@ int main()
 {
 	auto _genotypes = std::vector<genotype*>();
 
-	const auto _get_input = false;
+	const auto _get_input = true;
 
 	std::string _file_name;
 
@@ -106,18 +109,21 @@ int main()
 	float _mutation_rate;
 	int _population_size;
 	int _iterations;
+	int _max_rep;
 
 	const auto _default_crossover_rate = 0.8f;
-	const auto _default_mutation_rate = 0.01f;
-	const auto _default_population_size = 10000;
-	const auto _default_iterations = 100;
+	const auto _default_mutation_rate = 0.1f;
+	const auto _default_population_size = 5000;
+	const auto _default_iterations = 1000;
+	const auto _default_max_rep = 25;
 
 	if (_get_input)
 	{
-		get_input(_crossover_rate,	_default_crossover_rate,	"Crossover Rate");
-		get_input(_mutation_rate,	_default_mutation_rate,		"Mutation Rate");
-		get_input(_population_size, _default_population_size,	"Population Size");
-		get_input(_iterations,		_default_iterations,		"Iterations Count");
+		get_input(_crossover_rate, _default_crossover_rate, "Crossover Rate");
+		get_input(_mutation_rate, _default_mutation_rate, "Mutation Rate");
+		get_input(_population_size, _default_population_size, "Population Size");
+		get_input(_iterations, _default_iterations, "Iterations Count");
+		get_input(_max_rep, _default_max_rep, "Max Rep Count");
 	}
 	else
 	{
@@ -125,6 +131,7 @@ int main()
 		_mutation_rate = _default_mutation_rate;
 		_population_size = _default_population_size;
 		_iterations = _default_iterations;
+		_max_rep = _default_max_rep;
 	}
 
 	const auto _start_time = std::chrono::system_clock::now();
@@ -138,13 +145,13 @@ int main()
 
 	std::cout << std::endl;
 
-	std::cout << "Running..." << std::endl;
-
-	genetic_algorithm::run(_genotypes, _population_size, _iterations, _crossover_rate, _mutation_rate);
+	genetic_algorithm::run(_genotypes, _population_size, _iterations, _max_rep, _crossover_rate, _mutation_rate);
 
 	const auto _end_time = std::chrono::system_clock::now();
 
+	const auto _output = genetic_algorithm::s_global_fittest->get_hapolotypes_without_repetition();
 
+	const auto _output_file_name = "haplotypes.out";
 	{
 
 		std::cout << "-Data Size: " << _genotypes_size << std::endl;
@@ -156,15 +163,27 @@ int main()
 		std::cout << "-Geneteic Algorithm Duration: " <<
 			std::chrono::duration_cast<std::chrono::milliseconds>(_end_time - _start_time).count() << " mili seconds." << std::endl;
 
-		const auto _output = genetic_algorithm::s_global_fittest->get_hapolotypes_without_repetition();
-
 		std::cout << "- Output Haplotypes Size: " << _output.size() << std::endl;
 
 		const std::string is_valid_str = (is_valid_for_genotype(_genotypes, _output))
 			? "Is Valid" : "Not Valid (Algorithm Not Correct)";
 
 		std::cout << "- Validity Check : " << is_valid_str << std::endl;
+
+		std::cout << " - Output File : " << _output_file_name << std::endl;
 	}
+
+	// Write To File
+
+	std::ofstream _output_file;
+	_output_file.open(_output_file_name);
+
+	for (const auto& _haplo : _output)
+	{
+		_output_file << array_to_str(_haplo->_data) << std::endl;
+	}
+
+	_output_file.close();
 
 	system("pause");
 

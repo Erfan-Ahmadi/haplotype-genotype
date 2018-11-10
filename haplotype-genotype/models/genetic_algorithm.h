@@ -14,12 +14,13 @@ class genetic_algorithm
 {
 public:
 	static void run(
-		_In_ const std::vector<genotype*>& pGenotypes,
-		_In_ const int& pPopulationSize,
+		_In_	const std::vector<genotype*>& pGenotypes,
+		_In_	const int& pPopulationSize,
 		_In_	const int& pIterationCount,
-		_In_ const float& pCrossoverRate = 0.8f,
-		_In_ const float& pMutationRate = 0.01f,
-		_In_ const bool& pElitism = true);
+		_In_	const int& pMaxRep,
+		_In_	const float& pCrossoverRate,
+		_In_	const float& pMutationRate,
+		_In_	const bool& pElitism = true);
 
 	static individual* s_global_fittest;
 
@@ -31,6 +32,10 @@ private:
 		_In_ const std::vector<genotype*>& pGenotypes,
 		_In_ const int& pPopulationSize,
 		_In_ std::vector<individual*>& pPopulation);
+
+	static void mutate_individual(
+		_In_ const std::vector<genotype*>& pGenotypes,
+		_In_ individual** pIndividual);
 
 	static void mutation(
 		_In_ const std::vector<genotype*>& pGenotypes,
